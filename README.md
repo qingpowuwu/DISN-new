@@ -34,7 +34,7 @@ Primary contact: [Qiangeng Xu*](https://xharlie.github.io/)
   pip install trimesh==2.37.20
   pip install protobuf==3.20.*
   pip install opencv-python
-  pip install PyMCubes==0.1.2
+  pip install PyMCubes==0.1.2 # 原始版本的 ./demo/demo.py 里面需要使用 Intel Math Kernel Library (MKL) 共享库文件才能生成 .obj 文件，这样很麻烦，所以我改成了用 PyMCubes来生成.obj文件
   python -c "import tensorflow as tf; print(tf.__version__); print(tf.test.is_built_with_cuda()); print(tf.test.is_gpu_available())" # 验证 Tensorflow 是否能检测到 gpus
   ```
 Tensorflow 检测到了 GPU
