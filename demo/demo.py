@@ -352,15 +352,27 @@ def to_binary(res, pos, pred_sdf_val_all, sdf_file):
     f_sdf_bin.write(val)
     f_sdf_bin.close()
 
+# =============== 修改：开始 ===============
+
+# def create_obj(pred_sdf_val, sdf_params, dir, i):
+#     obj_nm = "result"
+#     cube_obj_file = os.path.join(dir, obj_nm+".obj")
+#     sdf_file = os.path.join(dir, obj_nm+".dist")
+#     to_binary((RESOLUTION-1), sdf_params, pred_sdf_val, sdf_file)
+#     create_one_cube_obj("./isosurface/computeMarchingCubes", i, sdf_file, cube_obj_file)
+#     command_str = "rm -rf " + sdf_file
+#     print("command:", command_str)
+#     os.system(command_str)
+
 def create_obj(pred_sdf_val, sdf_params, dir, i):
-    obj_nm = "result"
-    cube_obj_file = os.path.join(dir, obj_nm+".obj")
-    sdf_file = os.path.join(dir, obj_nm+".dist")
-    to_binary((RESOLUTION-1), sdf_params, pred_sdf_val, sdf_file)
-    create_one_cube_obj("./isosurface/computeMarchingCubes", i, sdf_file, cube_obj_file)
-    command_str = "rm -rf " + sdf_file
-    print("command:", command_str)
-    os.system(command_str)
+    import mcubes
+    new_dim = int(pred_sdf_val.shape[0] ** (1.0 / 3)) + 1
+    u = pred_sdf_val.reshape(new_dim, new_dim, new_dim)
+    vertices, triangles = mcubes.marching_cubes(u, 0)
+    mcubes.export_obj(vertices, triangles, "demo/result.obj")
+    print(" result.obj has been created into demo/result.obj")
+
+# =============== 修改：结束 ===============
 
 def create_one_cube_obj(marching_cube_command, i, sdf_file, cube_obj_file):
     command_str = marching_cube_command + " " + sdf_file + " " + cube_obj_file + " -i " + str(i)
