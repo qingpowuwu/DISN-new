@@ -24,18 +24,32 @@ Primary contact: [Qiangeng Xu*](https://xharlie.github.io/)
 
 
 ## System Requirements
-  * ### GPU: 1080Ti (Other models can consider decrease the batch size if overflow)
-  * ### system: Ubuntu 16.04 (if your linux version can support tensorflow 1.10, it's going to be ok)
-  * ### tensorflow 1.10(should be able to run with 1.11, 1.12,1.13)
-```
-    pip install trimesh==2.37.20
-```
+  * ### GPU: 8卡 V100-32G
+  * ### tensorflow 1.15
+  ```
+  conda create -n disn python=3.7 # python 版本必须小于 3.7 才能安装 1.15 版本的 tensorflow
+  pip activate disn
+  conda install cudatoolkit=10.0 cudnn  # TensorFlow 1.15 通常与 CUDA 10.0 兼容
+  pip install tensorflow-gpu==1.15
+  pip install trimesh==2.37.20
+  pip install protobuf==3.20.*
+  pip install opencv-python
+  pip install PyMCubes==0.1.2
+  python -c "import tensorflow as tf; print(tf.__version__); print(tf.test.is_built_with_cuda()); print(tf.test.is_gpu_available())" # 验证 Tensorflow 是否能检测到 gpus
+  ```
+Tensorflow 检测到了 GPU
+
+<img width="1164" alt="image" src="https://github.com/user-attachments/assets/d66aa294-b67b-49c3-a046-861bf69295cd">
 
 ## Installation SDF_DISN.tar & cam_DISN.tar
-### 1. 下载和解压缩 SDF_DISN.tar
+### 1. 下载和解压缩 SDF_DISN.tar (shape prediction network 的 checkpoints)
+The shape prediction network takes point cloud data as input:
+  * Input shape is (1, 212183, 3), representing 212,183 3D points
+  * It processes this through several convolutional layers
+  * The output is a predicted signed distance function (SDF) for each point
 #### (1) 下载 SDF_DISN.tar
   ```
-    cd /data/3dPrinter/5_DISN-master
+    cd /data/3dPrinter/5_2-DISN-new-master
     mkdir checkpoint
     cd checkpoint
     gdown --id 1PEXVxXflVqWNqinSMC-hFmFdlMyoMZ7i
@@ -46,10 +60,13 @@ Primary contact: [Qiangeng Xu*](https://xharlie.github.io/)
     tar -xvzf SDF_DISN.tar
     rm -rf SDF_DISN.tar
   ```
-### 2. 下载和解压缩 cam_DISN.tar
+<img width="362" alt="image" src="https://github.com/user-attachments/assets/8a6d8789-0ae1-4708-b4fc-34d0967a4569">
+
+### 2. 下载和解压缩 cam_DISN.tar (camera estimation network 的 checkpoints)
+The camera estimation network 预测 a transformation matrix for the input.
 #### (1) 下载 cam_DISN.tar
   ```
-    cd /data/3dPrinter/5_DISN-master
+    cd /data/3dPrinter/5_2-DISN-new-master
     mkdir cam_est/checkpoint
     cd cam_est/checkpoint
     gdown https://drive.google.com/uc?id=1S5Gh_u1C9vDvksqXDn3CP6IqsnU0hKkj
@@ -63,15 +80,55 @@ Primary contact: [Qiangeng Xu*](https://xharlie.github.io/)
     cd ../../
     Install whatever libary(e.g. mkl) you don't have and change corresponding libary path in your system in isosurface/LIB_PATH
   ```
+<img width="359" alt="image" src="https://github.com/user-attachments/assets/37ffc247-73ba-40de-80b5-cb91bbfcded9">
+
 ## Demo:
  * --sdf_res control the resolution of the sampled sdf, default is 64, the larger, the more fine-grained, but slower.
   ```
-    cd {DISN}
+    cd /data/3dPrinter/5_2-DISN-new-master
     source isosurface/LIB_PATH
+    chmod +x ./isosurface/computeMarchingCubes
     nohup python -u demo/demo.py --cam_est --log_dir checkpoint/SDF_DISN --cam_log_dir cam_est/checkpoint/cam_DISN --img_feat_twostream --sdf_res 256 &> log/create_sdf.log &
+    python -u demo/demo.py --cam_est --log_dir checkpoint/SDF_DISN --cam_log_dir cam_est/checkpoint/cam_DISN --img_feat_twostream --sdf_res 256
   ``` 
   The result is demo/result.obj.
   if you have dependency problems such as your mkl lib, etc. Please install the corresponding dependencies and change the path in LIB_PATH. Everyone has his/her/their own environment setting so it's impossible to instruct this step without sitting besides you and your server.
+<img width="1245" alt="image" src="https://github.com/user-attachments/assets/d000d89a-d4eb-4d10-8a7e-f32208886140">
+
+从输出来看，程序似乎运行成功了。让我为您解释一下主要步骤和输出：
+
+1. 程序成功加载了相机估计模型和主要的SDF (Signed Distance Function) 预测模型。
+
+2. GPU被正确识别和使用：
+   ```
+   Found device 0 with properties: 
+   name: Tesla V100S-PCIE-32GB major: 7 minor: 0 memoryClockRate(GHz): 1.597
+   pciBusID: 0000:00:06.0
+   ```
+
+3. 相机估计网络成功运行并输出了预测的变换矩阵：
+   ```
+   pred_trans_mat_val [[[-66.2053       3.0475838   -0.37013683]
+     [-15.545383   -81.84504     -0.22653787]
+     [-45.6831      -1.9617836    0.2427571 ]
+     [100.04551     99.63472      1.4153073 ]]]
+   ```
+
+4. 主要的SDF预测模型成功加载和运行。它处理了形状为 (80, 1, 212183, 3) 的输入点云数据。
+
+5. 最后，程序开始创建对象：
+   ```
+   submit create_obj
+   ```
+
+建议的下一步操作：
+
+1. 检查 "./demo/" 目录下是否有生成的输出文件。
+2. 查看是否有任何日志文件被创建，可能包含更多信息。
+3. 如果程序仍在运行，可以等待一段时间看是否有更多输出。
+4. 如果程序已经结束，可以再次运行，看看是否能得到相同的结果。
+5. 考虑在 create_obj 函数中添加更多的打印语句，以便更好地跟踪进度。
+
  
 ## Data Preparation
 
