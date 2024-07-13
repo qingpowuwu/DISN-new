@@ -93,7 +93,8 @@ The camera estimation network 预测 a transformation matrix for the input.
   ``` 
   The result is demo/result.obj.
   if you have dependency problems such as your mkl lib, etc. Please install the corresponding dependencies and change the path in LIB_PATH. Everyone has his/her/their own environment setting so it's impossible to instruct this step without sitting besides you and your server.
-<img width="1245" alt="image" src="https://github.com/user-attachments/assets/d000d89a-d4eb-4d10-8a7e-f32208886140">
+<img width="1242" alt="image" src="https://github.com/user-attachments/assets/ac3e513c-a143-4038-910f-8a09c1a848fd">
+
 
 从输出来看，程序似乎运行成功了。让我为您解释一下主要步骤和输出：
 
@@ -116,18 +117,13 @@ The camera estimation network 预测 a transformation matrix for the input.
 
 4. 主要的SDF预测模型成功加载和运行。它处理了形状为 (80, 1, 212183, 3) 的输入点云数据。
 
-5. 最后，程序开始创建对象：
+5. 最后，程序开始创建对象并且保存到了 `demo/result.obj`：
    ```
    submit create_obj
+   result.obj has been created into demo/result.obj
    ```
+<img width="1236" alt="image" src="https://github.com/user-attachments/assets/e19e4871-8f02-4b4e-abd4-c784dfb74575">
 
-建议的下一步操作：
-
-1. 检查 "./demo/" 目录下是否有生成的输出文件。
-2. 查看是否有任何日志文件被创建，可能包含更多信息。
-3. 如果程序仍在运行，可以等待一段时间看是否有更多输出。
-4. 如果程序已经结束，可以再次运行，看看是否能得到相同的结果。
-5. 考虑在 create_obj 函数中添加更多的打印语句，以便更好地跟踪进度。
 
  
 ## Data Preparation
