@@ -30,16 +30,25 @@ Primary contact: [Qiangeng Xu*](https://xharlie.github.io/)
   conda create -n disn python=3.7 # python 版本必须小于 3.7 才能安装 1.15 版本的 tensorflow
   pip activate disn
   conda install cudatoolkit=10.0 cudnn  # TensorFlow 1.15 通常与 CUDA 10.0 兼容
-  pip install tensorflow-gpu==1.15
-  pip install trimesh==2.37.20
   pip install protobuf==3.20.*
+  pip install tensorflow-gpu==1.15
+  python -c "import tensorflow as tf; print(tf.__version__); print(tf.test.is_built_with_cuda()); print(tf.test.is_gpu_available())" # 验证 Tensorflow 是否能检测到 gpus
+  conda install -c https://software.repos.intel.com/python/conda/ -c conda-forge mkl
+  python check_mkl.py
+  pip install trimesh==2.37.20
   pip install opencv-python
   pip install PyMCubes==0.1.2 # 原始版本的 ./demo/demo.py 里面需要使用 Intel Math Kernel Library (MKL) 共享库文件才能生成 .obj 文件，这样很麻烦，所以我改成了用 PyMCubes来生成.obj文件
-  python -c "import tensorflow as tf; print(tf.__version__); print(tf.test.is_built_with_cuda()); print(tf.test.is_gpu_available())" # 验证 Tensorflow 是否能检测到 gpus
+  pip install pymesh
+  pip install joblib
+  pip install trimesh
+  pip install mkl
+  
   ```
 Tensorflow 检测到了 GPU
 
 <img width="1164" alt="image" src="https://github.com/user-attachments/assets/d66aa294-b67b-49c3-a046-861bf69295cd">
+
+* 我尝试了 重装 几十种方法，都没有办法 让 numpy 检测到 mkl 包
 
 ## Installation SDF_DISN.tar & cam_DISN.tar
 ### 1. 下载和解压缩 SDF_DISN.tar (shape prediction network 的 checkpoints)
@@ -166,6 +175,7 @@ The camera estimation network 预测 a transformation matrix for the input.
   cd {DISN}
   source isosurface/LIB_PATH
   nohup python -u preprocessing/create_point_sdf_grid.py --thread_num {recommend 9} --category {default 'all', but can be single category like 'chair'} &> log/create_sdf.log &
+  python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair'
   
   ## SDF folder takes about 9.0G, marching cube obj folder takes about 245G
   
