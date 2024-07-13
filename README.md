@@ -240,6 +240,7 @@ The camera estimation network 预测 a transformation matrix for the input.
   nohup python -u preprocessing/create_point_sdf_grid.py --thread_num {recommend 9} --category {default 'all', but can be single category like 'chair'} &> log/create_sdf.log &
 
   nohup python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair' &> log/create_sdf.log &
+  nohup python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair' &> log/create_sdf_$(date +%Y%m%d_%H%M%S).log &
   python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair'
   
   ## SDF folder takes about 9.0G, marching cube obj folder takes about 245G
