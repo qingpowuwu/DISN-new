@@ -249,18 +249,22 @@ The camera estimation network 预测 a transformation matrix for the input.
 用 marching cube 重建出来的 1个 reconstructed ground truth model:  
 <img width="1803" alt="Screenshot 2024-07-14 at 2 32 47 AM" src="https://github.com/user-attachments/assets/6c4be764-899a-4e6b-935b-1c1d189a48ae">
 
-### 4. 下载和生成 2d image h5 files:
+### 4. 下载 or 渲染出 ShapeNetCore_V1 的 2d image h5 files:
 #### 方法1: 下载 2d image following 3DR2N2[https://github.com/chrischoy/3D-R2N2], please cite their paper if you use this image tar file:
   
   ```
   wget http://cvgl.stanford.edu/data2/ShapeNetRendering.tgz
   untar it to {your rendered_dir}
   ```
+<img width="1803" alt="Screenshot 2024-07-14 at 2 50 36 AM" src="https://github.com/user-attachments/assets/f8dbf13e-f4f9-4b86-9791-bdb2e3c3e82a">
+
 #### 方法2: 用代码生成 .h5 file generation (about 26 GB) :
   
   ```
   cd {DISN}
   nohup python -u preprocessing/create_img_h5.py &> log/create_imgh5.log &
+
+  python -u preprocessing/create_img_h5.py
   ```
 
 ##  Camera parameters estimation network
