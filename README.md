@@ -137,19 +137,7 @@ The camera estimation network 预测 a transformation matrix for the input.
  
 ## Data Preparation
 
-* ### file location setup:
-  * under preprocessing/info.json, you can change the locations of your data: the neccessary dir for the main model are : 
-   ```  
-        "raw_dirs_v1": {
-        "mesh_dir": "/ssd1/datasets/ShapeNet/ShapeNetCore.v1/",
-        "norm_mesh_dir": "/ssd1/datasets/ShapeNet/march_cube_objs_v1/",
-        "rendered_dir": "/ssd1/datasets/ShapeNet/ShapeNetRendering/",
-        "renderedh5_dir": "/ssd1/datasets/ShapeNet/ShapeNetRenderingh5_v1/",
-        "sdf_dir": "/ssd1/datasets/ShapeNet/SDF_v1/"
-        }
-   ```
-  
-* ### Download ShapeNetCore.v1 
+### 1. 下载 ShapeNetCore.v1 数据集
   download the dataset following the instruction of https://www.shapenet.org/account/  (about 30GB)
 
   直接百度云 下载 ShapeNetCore.v1.zip 
@@ -162,32 +150,112 @@ The camera estimation network 预测 a transformation matrix for the input.
   cd {your download dir}
   unzip ShapeNetCore.v1.zip -d {your mesh_dir}
   ```
+  我下载到了 `/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetCore_v1`
+
+### 2. 设置 之前下载的 ShapeNetCore_v1 数据集的位置 & 要生成的文件的位置
+  * under preprocessing/info.json, you can change the locations of your data: the neccessary dir for the main model are : 
+   ```  
+   {
+       "lst_dir": "./data/filelists", 
+       "cats": {
+           "watercraft": "04530566",
+           "rifle": "04090263",
+           "display": "03211117",
+           "lamp": "03636649",
+           "speaker": "03691459",
+           "cabinet": "02933112",
+           "chair": "03001627",
+           "bench": "02828884",
+           "car": "02958343",
+           "airplane": "02691156",
+           "sofa": "04256520",
+           "table": "04379243",
+           "phone": "04401088"
+       },
+       "all_cats": [
+           "airplane",
+           "bench",
+           "cabinet",
+           "car",
+           "chair",
+           "display",
+           "lamp",
+           "speaker",
+           "rifle",
+           "sofa",
+           "table",
+           "phone",
+           "watercraft"
+       ],
+       "raw_dirs_v1": {
+           "mesh_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetCore_v1", # 改成 (1) 里面下载的 ShapeNetCore_v1 的位置， 下面的其他地址都是 后面运行代码生成的东西所需要放的位置，可以随便写
+           "norm_mesh_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/march_cube_objs_v1/",
+           "norm_mesh_dir_v2": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/march_cube_objs/",
+           "sdf_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/SDF_v1/",
+           "sdf_dir_v2": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/SDF_v2/",
+           "rendered_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRendering/",
+           "rendered_new_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRendering.v1/",
+           "renderedh5_new_dir_easy": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRenderingh5_v1_new_easy.v1/",
+           "renderedh5_new_dir_hard": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRenderingh5_v1_new_hard.v1/",
+           "renderedh5_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRenderingh5_v1_more/",
+           "renderedh5_dir_v2": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRenderingh5_v2/",
+           "renderedh5_dir_est": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/ShapeNetRenderingh5_v1_pred_3d/",
+           "3dnnsdf_dir": "/data/3dPrinter/0_Dataset_Ori/4_DISN_Datasets/1_Downloaded/ShepeNet/SDF_full/"
+       }
+   }
+
+   ```
+
   
-* ### Prepare the SDF ground truth and the marching cube reconstructed ground truth models 
-
-  * Download our generated sdf tar.gz from [here](https://drive.google.com/file/d/1cHDickPLKLz3smQNpOGXD2W5mkXcy1nq/view?usp=sharing)
-  * then place it at your "sdf_dir" in json; and the marching cube reconstructed ground truth models from the sdf file from [here](https://drive.google.com/drive/folders/1QGhDW335L7ra31uw5U-0V7hB-viA0JXr?usp=sharing)
-  * then place it at your "norm_mesh_dir" in your json.
-
-  If you want to generate sdf files and the reconstructed models by yourself, please follow the command lines below (Please expect the script to run for several hours). This step used this paper [Vega: non-linear fem deformable object simulator](http://run.usc.edu/vega/SinSchroederBarbic2012.pdf). Please also cite it if you use our code to generate sdf files
+### 3. 用 3d.obj 模型 生成 SDF ground truth & 用 marching cube 重建出来的 reconstructed ground truth models 
+#### 方法1: 直接下载作者生成好的 sdf tar.gz
+  1. 下载 generated sdf tar.gz from [here](https://drive.google.com/file/d/1cHDickPLKLz3smQNpOGXD2W5mkXcy1nq/view?usp=sharing)
+  2. then place it at your "sdf_dir" in json;
+  3. 下载 the marching cube 重建出来的 reconstructed ground truth models from the sdf file from [here](https://drive.google.com/drive/folders/1QGhDW335L7ra31uw5U-0V7hB-viA0JXr?usp=sharing)
+  4. then place it at your "norm_mesh_dir" in your json.
+#### 方法2: 用代码生成 SDF 文件 & 用代码生成 the reconstructed models (大概会运行几小时) (这个环境超级难配)
+  This step used this paper [Vega: non-linear fem deformable object simulator](http://run.usc.edu/vega/SinSchroederBarbic2012.pdf). 
+  因为这个环境超级难配，为了 把 preprocessing/create_point_sdf_grid.py 跑起来，首先需要下载 MKL、tcmalloc、TBB、libpng12 库。并且把 他们的位置放到 preprocessing/create_point_sdf_grid.py 的开头, 如何解决我都已经更新到 preprocessing/create_point_sdf_grid.py 代码里面了，这里简要说一下如何解决的。
+#####  1. 下载 libpng12-0
+     * 到 https://launchpad.net/~linuxuprising/+archive/ubuntu/libpng12 下载 .deb
+     * 访问 PPA 的包详情页面：https://launchpad.net/~linuxuprising/+archive/ubuntu/libpng12/+packages
+     * 找到 libpng - 1.2.54-1ubuntu1.1+1~ppa0~focal    (changes file)    logix2    2019-12-07    Published    Focal    Libs    All builds were built successfully.
+     * 找到 libpng12-0_1.2.54-1ubuntu1.1+1~ppa0~focal_amd64.deb (168.9 KiB)
+     * 下载到 本地的一个目录下
+     * 安装 使用 `sudo dpkg -i libpng12-0_1.2.54-1ubuntu1.1+1~ppa0~focal_amd64.deb` 进行安装
+#####  2. 下载 TBB
+  ```
+  # 更新 TBB 的路径
+  (disn) (base) root@v100s02:/data/3dPrinter/5_2-DISN-new-master# sudo find / -name "libtbb*.so*" # => 之后会找到一堆路径，然后选择一个
+  sudo ln -s /data/3dPrinter/5_2-DISN-new-master/isosurface/tbb/tbb2018_20180822oss/lib/intel64/gcc4.7/libtbb_preview.so.2 /usr/lib/libtbb_preview.so.2 # 创建一个符号链接到 /usr/lib/ 目录
+  ```
+  之后把上面的 这个 `/data/3dPrinter/5_2-DISN-new-master/isosurface/tbb/tbb2018_20180822oss/lib/intel64/gcc4.7/libtbb_preview.so.2 /usr/lib/libtbb_preview.so.2` 地址更新到 preprocessing/create_point_sdf_grid.py 的开头，更新到环境变量里面。
+#####  3. 对于 MKL, tcmalloc 也一样，按照 TBB 的步骤就可以了
+#####  4. 运行 preprocessing/create_point_sdf_grid.py 来生成 ShapeNetCore_V1 文件夹下面各种 .obj 所对应的 .sdf 文件 & 用 marching cube 重建出来的 reconstructed ground truth models 
   ```
   mkdir log
-  cd {DISN}
+  cd /data/3dPrinter/5_2-DISN-new-master
   source isosurface/LIB_PATH
+
   nohup python -u preprocessing/create_point_sdf_grid.py --thread_num {recommend 9} --category {default 'all', but can be single category like 'chair'} &> log/create_sdf.log &
+
+  nohup python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair' &> log/create_sdf.log &
   python -u preprocessing/create_point_sdf_grid.py --thread_num 9 --category 'chair'
   
   ## SDF folder takes about 9.0G, marching cube obj folder takes about 245G
   
   ```
-* ### Download and generate 2d image h5 files:
-  * #### download 2d image following 3DR2N2[https://github.com/chrischoy/3D-R2N2], please cite their paper if you use this image tar file:
+用 marching cube 重建出来的 1个 reconstructed ground truth model:  
+<img width="1803" alt="Screenshot 2024-07-14 at 2 32 47 AM" src="https://github.com/user-attachments/assets/6c4be764-899a-4e6b-935b-1c1d189a48ae">
+
+### 4. 下载和生成 2d image h5 files:
+#### 方法1: 下载 2d image following 3DR2N2[https://github.com/chrischoy/3D-R2N2], please cite their paper if you use this image tar file:
   
   ```
   wget http://cvgl.stanford.edu/data2/ShapeNetRendering.tgz
   untar it to {your rendered_dir}
   ```
-  * #### run h5 file generation (about 26 GB) :
+#### 方法2: 用代码生成 .h5 file generation (about 26 GB) :
   
   ```
   cd {DISN}
